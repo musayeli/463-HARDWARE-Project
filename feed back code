@@ -1,0 +1,125 @@
+const int speedUp = 12;     // the number of the pushbutton pin
+const int speedDown = 11;     // the number of the pushbutton pin
+const int optopin =  3;      // the number of the LED pin
+const int maxspeed = 160; //this can be any number - it's the number of steps between dimmest and brightest. 
+const int minspeed = 0;
+int hall_pin = 0;
+unsigned long t = 0;
+unsigned long lastmillis = 0;
+float rpm=0;
+float a=0;
+float b=0;
+int desired_rpm=0;
+int duty=0;
+int c=0;
+float rpm1=0;
+float rpm2=0;
+float rpm3=0;
+float rpm4=0;
+float rpm5=0;
+volatile float rpm_overall=0;
+// set number of hall trips for rpm_val_val reading (higher improves accuracy)
+float hall_thresh = 100.0;
+int d=0;
+// variables will change:spd
+volatile int rpmcount = 0;
+unsigned long t_prev = 0;
+unsigned long t_diff = 0;
+float e=0;
+int ti=0;
+int spd = minspeed;
+int interval=1;
+int deger;
+void setup() {
+  // initialize the LED pin as an output:
+  pinMode(optopin, OUTPUT);      
+  // initialize the pushbutton pins as an input:
+  pinMode(speedUp, INPUT);     
+  pinMode(speedDown, INPUT);  
+   attachInterrupt(hall_pin, control, FALLING);
+  Serial.begin(9600);
+  TCCR2B = (TCCR2B & 0b11111000) | 0x03; //980.39 [Hz]  
+}
+
+
+    // rpm_val_val reading code 
+
+void loop()
+{
+ // Serial.println(rpm_overall);
+  //Serial.println(spd);
+  // button code
+    if (digitalRead(speedUp) == HIGH && spd < maxspeed)
+    { 
+      spd = spd + interval; 
+       d=0;
+      //if the spd Up button is pushed, add one degree of spd to the current level
+      Serial.println(spd); //for debugging purposes
+      //Serial.println(rpm_overall);
+    }
+    if (digitalRead(speedDown) == HIGH && spd > 0)
+    {
+      spd = spd - interval;
+      d=0;
+      //if the spd Down button is pushed, subtract one degree of spd from the current level
+      Serial.println(spd); //for debugging purposes
+      //Serial.println(rpm_overall);
+    }
+    delay(100);
+    analogWrite(optopin, map(spd, 0, maxspeed, 0, 225));    
+    //this code maps the max spd constant to the max LED spd
+
+
+  
+    // closed loop feeed back code
+    
+    //if(rpm2>300){
+       // a=1;
+       // Serial.println("a=1");
+   // }
+   //if(a==1){
+   // while(rpm2>400  && digitalRead(speedDown) == LOW && a==1){
+   //  spd = spd - interval;
+    //Serial.println("azalt");
+    //  Serial.println("rpm:  ");
+    //  Serial.println(rpm2);
+     // rpm2=rpm1();
+     
+
+ // Serial.println(rpm2);
+ //   }
+   //while(rpm2<300 && digitalRead(speedDown) == LOW && a==1){
+  
+     //spd = spd + interval;
+     //Serial.println("artır");
+      ///Serial.println("rpm:  ");
+
+  //Serial.println(rpm2);
+  //rpm2=rpm1();
+    //}
+   //}
+}
+void control () {
+   t_prev=t;
+  t=millis();
+  t_diff=t-t_prev;
+  b = (float) t_diff;
+  a=1000/b;
+  rpm=60*a;
+ Serial.println(rpm);
+  if(rpm>0 && rpm<1500){
+   
+     rpm5=rpm4;
+      rpm4=rpm3;
+      rpm3=rpm2;
+      rpm2=rpm1;
+    rpm1=rpm;
+   
+   
+   
+   
+   rpm_overall=(rpm1+rpm2+rpm3+rpm4+rpm5)/5;
+ Serial.println(rpm_overall);  
+  }
+ 
+}
